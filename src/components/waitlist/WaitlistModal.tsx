@@ -19,9 +19,9 @@ interface WaitlistModalProps {
 }
 
 const TOOL_OPTIONS = [
-  "Obsidian", "Napkin AI", "Mem", "Otio", "Fabric", "mymind", "Notion", 
-  "Evernote", "Craft", "Me.bot", "Raindrop", "MyMemo", "logseq", "inkdrop", 
-  "Traverse", "Eraser", "MuseApp", "Milanote", "Supernotes", "others"
+  "Excel/Spreadsheets", "Risk Management Software", "Enterprise Software", 
+  "Manual Processes", "Custom Solutions", "Third-party Tools", 
+  "Legacy Systems", "Others"
 ]
 
 export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
@@ -33,14 +33,37 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
     reason: ""
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically send this data to your backend
-    console.log("Submitted data:", formData)
-    toast.success("Thanks for joining our waitlist! We'll be in touch soon.", {
-      duration: 5000,
-    })
-    onClose()
+    
+    try {
+      // Create email body
+      const emailBody = `
+New Risk Pro Technology Waitlist Submission:
+
+Name: ${formData.name}
+Email: ${formData.email}
+LinkedIn: ${formData.linkedin}
+Current Tool: ${formData.currentTool}
+Reason for Interest: ${formData.reason}
+
+Submitted at: ${new Date().toLocaleString()}
+      `;
+
+      // Create mailto link
+      const mailtoLink = `mailto:604riskpro@gmail.com?subject=New Waitlist Submission - ${formData.name}&body=${encodeURIComponent(emailBody)}`;
+      
+      // Open email client
+      window.location.href = mailtoLink;
+      
+      console.log("Submitted data:", formData)
+      toast.success("Thanks for joining our waitlist! Your email client should open shortly.", {
+        duration: 5000,
+      })
+      onClose()
+    } catch (error) {
+      toast.error("There was an error submitting your information. Please try again.")
+    }
   }
 
   return (
@@ -49,7 +72,7 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
         <DialogHeader>
           <DialogTitle>Join Our Waitlist</DialogTitle>
           <DialogDescription>
-            Help us understand your needs better and get early access.
+            Help us understand your risk management needs and get early access to Risk Pro Technology.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
@@ -98,7 +121,7 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="currentTool">Current Tool</Label>
+            <Label htmlFor="currentTool">Current Risk Management Tool</Label>
             <select
               id="currentTool"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -116,7 +139,7 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="reason">Why are you interested?</Label>
+            <Label htmlFor="reason">Why are you interested in Risk Pro Technology?</Label>
             <textarea
               id="reason"
               className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

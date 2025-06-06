@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, LogIn, Search, Upload, User, Settings, LogOut, Moon, Sun, Table, Info, HelpCircle, Code } from 'lucide-react';
+import { Shield, LogIn, Search, Upload, User, Settings, LogOut, Moon, Sun, Table, Info, HelpCircle, Code } from 'lucide-react';
 import { useRippleEffect } from '@/lib/animations';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -135,7 +136,7 @@ export const Navbar = () => {
     setActive(id);
   };
 
-  const cortexSubmenu = [
+  const riskProSubmenu = [
     { to: '/', icon: <Info size={18} />, label: 'What', id: 'what' },
     { to: '/why', icon: <HelpCircle size={18} />, label: 'Why', id: 'why' },
     { to: '/how', icon: <Code size={18} />, label: 'How', id: 'how' },
@@ -156,16 +157,16 @@ export const Navbar = () => {
       <TooltipProvider>
         <header className="glass-panel fixed top-6 left-1/2 transform -translate-x-1/2 z-40 rounded-lg px-1 py-1">
           <nav className="flex items-center">
-            {/* Cortex with submenu */}
+            {/* Risk Pro Technology with submenu */}
             <NavItem
               to="#"
-              icon={<Brain size={20} />}
-              label="Cortex"
+              icon={<Shield size={20} />}
+              label="Risk Pro Technology"
               active={['what', 'why', 'how'].includes(active)}
               onClick={() => {}}
               hasSubmenu={true}
             >
-              {cortexSubmenu.map((item) => (
+              {riskProSubmenu.map((item) => (
                 <SubMenuItem
                   key={item.id}
                   to={item.to}
