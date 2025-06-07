@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { AnimatedTransition } from '@/components/AnimatedTransition';
 import { useState } from 'react';
 import { WaitlistModal } from '../waitlist/WaitlistModal';
+import { Link } from 'react-router-dom';
 
 interface CallToActionProps {
   show: boolean;
@@ -27,8 +28,15 @@ export const CallToAction = ({ show }: CallToActionProps) => {
             Join Waitlist
           </Button>
           
-          <Button size="lg" variant="outline" className="rounded-full px-8 py-6 text-base font-medium bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground/10 transition-all duration-300">
-            See How it Works
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className="rounded-full px-8 py-6 text-base font-medium bg-transparent text-primary-foreground border-primary-foreground hover:bg-primary-foreground/10 transition-all duration-300"
+            asChild
+          >
+            <Link to="/see-how-it-works">
+              See How it Works
+            </Link>
           </Button>
         </div>
       </div>

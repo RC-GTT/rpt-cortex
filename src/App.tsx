@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index";
 import WhyPage from "./pages/WhyPage";
 import HowPage from "./pages/HowPage";
+import SeeHowItWorksPage from "./pages/SeeHowItWorksPage";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Import from "./pages/Import";
@@ -59,6 +60,14 @@ const AppRoutes = () => {
         element={
           <PageTransition>
             <HowPage />
+          </PageTransition>
+        } 
+      />
+      <Route 
+        path="/see-how-it-works" 
+        element={
+          <PageTransition>
+            <SeeHowItWorksPage />
           </PageTransition>
         } 
       />
