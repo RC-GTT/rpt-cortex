@@ -117,7 +117,7 @@ Submitted at: ${new Date().toLocaleString()}
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Join Our Waitlist</DialogTitle>
+          <DialogTitle>Contact Us</DialogTitle>
           <DialogDescription>
             Help us understand your risk management needs and get early access to Risk Pro Technology.
           </DialogDescription>
