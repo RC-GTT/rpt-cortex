@@ -1,69 +1,75 @@
-# Welcome to your Lovable project
+RPT Cortex
+RPT Cortex is the central intelligence engine of the Risk Pro Technology platform. Designed as a modular and extensible backend system, it powers secure and context-aware AI interactions for risk management, safety operations, and decision support applications.
 
-## Project info
+This project is maintained by Risk Pro Consulting, a leader in practical AI solutions for enterprise and public safety needs.
 
-**URL**: https://lovable.dev/projects/513db1a2-0fcc-4643-bd43-f10d076dfa80
+🌐 Project Purpose
+RPT Cortex is built to serve as the core orchestration layer for AI-driven services, enabling seamless communication between local tools, third-party APIs (like OpenAI, OpenRouter, or Gemini), and risk-specific applications. Whether you're building an internal safety alerting system or an external client risk assessment platform, RPT Cortex is the middleware that connects your model logic to real-world data.
 
-## How can I edit this code?
+🚀 Features
+Model Context Protocol (MCP): Standardized communication layer for passing context, prompts, and resources to AI models.
 
-There are several ways of editing your application.
+Plugin-ready architecture: Easily integrate new tools, data sources, or external services.
 
-**Use Lovable**
+API Routing & Tool Management: Manage which LLMs or services are active, and switch between APIs dynamically.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/513db1a2-0fcc-4643-bd43-f10d076dfa80) and start prompting.
+Context Injection System: Injects relevant domain knowledge, logs, or history into each AI query session.
 
-Changes made via Lovable will be committed automatically to this repo.
+Local-first Design: Supports local LLMs and deployments for secure, private enterprise environments.
 
-**Use your preferred IDE**
+🧠 Use Case Examples
+Safety Alert Intelligence: Parse, analyze, and respond to safety alerts in real time.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Risk Report Automation: Generate documentation and summaries from incident data.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+AI Chat Orchestration: Route prompts to the most effective model based on context or cost constraints.
 
-Follow these steps:
+📦 Project Status
+This is an early-stage, proof-of-concept implementation. While the foundation is solid, we are actively working on:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Enhanced session and memory handling
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Admin interface for managing plugins and settings
 
-# Step 3: Install the necessary dependencies.
-npm i
+Model performance analytics
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Improved testing and error logging
 
-**Edit a file directly in GitHub**
+🛠️ Tech Stack
+Node.js / Express (server-side)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+YAML / JSON config-based routing
 
-**Use GitHub Codespaces**
+LLM API integrations (OpenAI, OpenRouter, Gemini, etc.)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Custom middleware for risk & safety workflows
 
-## What technologies are used for this project?
+🏗️ Setup Instructions
+Clone the repo:
 
-This project is built with .
+bash
+Copy
+Edit
+git clone https://github.com/RC-GTT/rpt-cortex.git
+cd rpt-cortex
+Install dependencies:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+bash
+Copy
+Edit
+npm install
+Configure environment:
+Create a .env file with your API keys and endpoint configs.
 
-## How can I deploy this project?
+Start the server:
 
-Simply open [Lovable](https://lovable.dev/projects/513db1a2-0fcc-4643-bd43-f10d076dfa80) and click on Share -> Publish.
+bash
+Copy
+Edit
+npm start
+🔒 Disclaimer
+This project is in active development and is provided "as-is" for exploration and testing purposes. Production use requires proper validation, security hardening, and compliance review.
 
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+📣 Learn More
+For more about our mission, visit:
+🔗 Risk Pro Technology – Innovation in Safety & AI
