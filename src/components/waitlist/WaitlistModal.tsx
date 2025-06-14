@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import { Check, Mail, User, Link as LinkIcon } from "lucide-react"
 import { toast } from "sonner"
-import emailjs from '@emailjs/browser'
+import { supabase } from "@/integrations/supabase/client"
 
 interface WaitlistModalProps {
   isOpen: boolean
@@ -40,39 +40,16 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
     setIsSubmitting(true)
     
     try {
-      // Initialize EmailJS (you'll need to replace these with actual values)
-      emailjs.init("YOUR_PUBLIC_KEY") // Replace with your EmailJS public key
-      
-      const templateParams = {
-        to_email: "604riskpro@gmail.com",
-        from_name: formData.name,
-        from_email: formData.email,
-        linkedin_url: formData.linkedin,
-        current_tool: formData.currentTool,
-        reason: formData.reason,
-        submitted_at: new Date().toLocaleString(),
-        message: `
-New Risk Pro Technology Waitlist Submission:
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: formData
+      })
 
-Name: ${formData.name}
-Email: ${formData.email}
-LinkedIn: ${formData.linkedin}
-Current Tool: ${formData.currentTool}
-Reason for Interest: ${formData.reason}
-
-Submitted at: ${new Date().toLocaleString()}
-        `
+      if (error) {
+        throw error
       }
-
-      // Send email using EmailJS
-      await emailjs.send(
-        'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-        'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-        templateParams
-      )
       
-      console.log("Email sent successfully:", formData)
-      toast.success("Thank you for joining our waitlist! We've received your information and will be in touch soon.", {
+      console.log("Email sent successfully:", data)
+      toast.success("Thank you for contacting us! We've received your information and will be in touch soon.", {
         duration: 5000,
       })
       
@@ -89,9 +66,9 @@ Submitted at: ${new Date().toLocaleString()}
     } catch (error) {
       console.error("Email sending failed:", error)
       
-      // Fallback to mailto if EmailJS fails
+      // Fallback to mailto if Supabase function fails
       const emailBody = `
-New Risk Pro Technology Waitlist Submission:
+New Risk Pro Technology Contact Submission:
 
 Name: ${formData.name}
 Email: ${formData.email}
@@ -102,7 +79,7 @@ Reason for Interest: ${formData.reason}
 Submitted at: ${new Date().toLocaleString()}
       `;
 
-      const mailtoLink = `mailto:604riskpro@gmail.com?subject=New Waitlist Submission - ${formData.name}&body=${encodeURIComponent(emailBody)}`;
+      const mailtoLink = `mailto:604riskpro@gmail.com?subject=New Contact Submission - ${formData.name}&body=${encodeURIComponent(emailBody)}`;
       window.location.href = mailtoLink;
       
       toast.warning("Opening your email client to send the information. Please make sure to send the email to complete your submission.", {
