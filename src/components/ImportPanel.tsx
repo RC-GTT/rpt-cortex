@@ -1,9 +1,10 @@
-
 import React, { useState } from 'react';
 import { Upload, FileText, Globe, Database, Type } from 'lucide-react';
 import { ImportSource } from '@/lib/types';
 import AnimatedTransition from './AnimatedTransition';
 import { cn } from '@/lib/utils';
+import { FileUpload } from './FileUpload';
+import { Button } from './ui/button';
 
 const importSources: ImportSource[] = [
   {
@@ -91,6 +92,8 @@ const ImportSourceCard: React.FC<ImportSourceCardProps> = ({ source, onClick, is
 
 export const ImportPanel: React.FC = () => {
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
+  const [csvFiles, setCsvFiles] = useState<File[]>([]);
+  const [docFiles, setDocFiles] = useState<File[]>([]);
   
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -99,7 +102,11 @@ export const ImportPanel: React.FC = () => {
           <ImportSourceCard
             key={source.id}
             source={source}
-            onClick={() => setSelectedSource(source.id)}
+            onClick={() => {
+              setSelectedSource(source.id);
+              setCsvFiles([]);
+              setDocFiles([]);
+            }}
             isActive={selectedSource === source.id}
           />
         ))}
@@ -116,15 +123,15 @@ export const ImportPanel: React.FC = () => {
             <p className="text-muted-foreground">
               Upload a CSV file to import structured data into your second brain.
             </p>
-            <div className="border-2 border-dashed border-border rounded-xl p-10 text-center">
-              <Upload size={40} className="mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                Drag and drop a CSV file here, or click to browse
-              </p>
-              <button className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
-                Browse Files
-              </button>
-            </div>
+            <FileUpload
+              onFilesSelected={setCsvFiles}
+              acceptedFileTypes=".csv"
+              multiple={false}
+              fileTypeDescription="Only .csv files are accepted"
+            />
+            {csvFiles.length > 0 && (
+              <Button>Import {csvFiles.length} file</Button>
+            )}
           </div>
         )}
         
@@ -189,18 +196,15 @@ export const ImportPanel: React.FC = () => {
             <p className="text-muted-foreground">
               Upload documents, PDFs, and other files to import into your second brain.
             </p>
-            <div className="border-2 border-dashed border-border rounded-xl p-10 text-center">
-              <Upload size={40} className="mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                Drag and drop files here, or click to browse
-              </p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Supported formats: PDF, DOCX, TXT, MD
-              </p>
-              <button className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
-                Browse Files
-              </button>
-            </div>
+            <FileUpload
+              onFilesSelected={setDocFiles}
+              acceptedFileTypes=".pdf,.docx,.txt,.md"
+              multiple={true}
+              fileTypeDescription="Supported formats: PDF, DOCX, TXT, MD"
+            />
+            {docFiles.length > 0 && (
+              <Button>Import {docFiles.length} file(s)</Button>
+            )}
           </div>
         )}
         
