@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -8,10 +9,21 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
 import { Check, Mail, User, Link as LinkIcon } from "lucide-react"
 import { toast } from "sonner"
 import { supabase } from "@/integrations/supabase/client"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Textarea } from "../ui/textarea"
 
 interface WaitlistModalProps {
   isOpen: boolean
@@ -24,33 +36,40 @@ const TOOL_OPTIONS = [
   "Legacy Systems", "Others"
 ]
 
+const waitlistFormSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email address." }),
+  linkedin: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  currentTool: z.string({ required_error: "Please select your current tool." }).min(1, { message: "Please select your current tool." }),
+  reason: z.string().min(10, { message: "Please tell us a bit more (at least 10 characters)." })
+});
+
 export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    linkedin: "",
-    currentTool: "",
-    reason: ""
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const form = useForm<z.infer<typeof waitlistFormSchema>>({
+    resolver: zodResolver(waitlistFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      linkedin: "",
+      currentTool: "",
+      reason: ""
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const { isSubmitting } = form.formState;
 
+  const onSubmit = async (values: z.infer<typeof waitlistFormSchema>) => {
     try {
-      console.log("Submitting waitlist form:", formData);
+      console.log("Submitting waitlist form:", values);
 
       const { data, error } = await supabase.functions.invoke('send-contact-email', {
-        body: formData,
+        body: values,
       });
 
       if (error) {
-        // This handles network errors or function invocation errors
         throw error;
       }
       
-      // The edge function itself might return an error in its response body
       if (data.error) {
         throw new Error(data.details || data.error);
       }
@@ -61,23 +80,13 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
         duration: 5000,
       });
 
-      // Reset form on success
-      setFormData({
-        name: "",
-        email: "",
-        linkedin: "",
-        currentTool: "",
-        reason: ""
-      });
-      
+      form.reset();
       onClose();
     } catch (error: any) {
       console.error("Waitlist submission failed:", error);
       toast.error(error.message || "Failed to submit form. Please try again.", {
         duration: 7000,
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -96,93 +105,109 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
             Help us understand your risk management needs and get early access to Risk Pro Technology.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="name">Name *</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="name"
-                className="pl-10"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                disabled={isSubmitting}
-                placeholder="Your full name"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email *</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                className="pl-10"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                disabled={isSubmitting}
-                placeholder="your.email@company.com"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="linkedin">LinkedIn URL</Label>
-            <div className="relative">
-              <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="linkedin"
-                type="url"
-                className="pl-10"
-                value={formData.linkedin}
-                onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                disabled={isSubmitting}
-                placeholder="https://linkedin.com/in/yourprofile"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="currentTool">Current Risk Management Tool *</Label>
-            <select
-              id="currentTool"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
-              value={formData.currentTool}
-              onChange={(e) => setFormData({ ...formData, currentTool: e.target.value })}
-              required
-              disabled={isSubmitting}
-            >
-              <option value="">Select your current tool</option>
-              {TOOL_OPTIONS.map((tool) => (
-                <option key={tool} value={tool}>
-                  {tool}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="reason">Why are you interested in Risk Pro Technology? *</Label>
-            <textarea
-              id="reason"
-              className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
-              value={formData.reason}
-              onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-              required
-              disabled={isSubmitting}
-              placeholder="Tell us about your risk management challenges and how Risk Pro Technology could help..."
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name *</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="Your full name" className="pl-10" {...field} disabled={isSubmitting} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            <Check className="mr-2 h-4 w-4" /> 
-            {isSubmitting ? "Processing..." : "Join Waitlist"}
-          </Button>
-        </form>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email *</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="your.email@company.com" className="pl-10" {...field} disabled={isSubmitting} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="linkedin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>LinkedIn URL</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="https://linkedin.com/in/yourprofile" className="pl-10" {...field} disabled={isSubmitting} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="currentTool"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Current Risk Management Tool *</FormLabel>
+                  <FormControl>
+                     <select
+                        {...field}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
+                        disabled={isSubmitting}
+                      >
+                        <option value="">Select your current tool</option>
+                        {TOOL_OPTIONS.map((tool) => (
+                          <option key={tool} value={tool}>
+                            {tool}
+                          </option>
+                        ))}
+                      </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reason"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Why are you interested in Risk Pro Technology? *</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Tell us about your risk management challenges and how Risk Pro Technology could help..."
+                      className="resize-none"
+                      {...field}
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Check className="mr-2 h-4 w-4" /> 
+              {isSubmitting ? "Processing..." : "Join Waitlist"}
+            </Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )
