@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -8,7 +7,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -23,7 +21,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Textarea } from "../ui/textarea"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface WaitlistModalProps {
   isOpen: boolean
@@ -164,20 +169,20 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Current Risk Management Tool *</FormLabel>
-                  <FormControl>
-                     <select
-                        {...field}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
-                        disabled={isSubmitting}
-                      >
-                        <option value="">Select your current tool</option>
-                        {TOOL_OPTIONS.map((tool) => (
-                          <option key={tool} value={tool}>
-                            {tool}
-                          </option>
-                        ))}
-                      </select>
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your current tool" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TOOL_OPTIONS.map((tool) => (
+                        <SelectItem key={tool} value={tool}>
+                          {tool}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
