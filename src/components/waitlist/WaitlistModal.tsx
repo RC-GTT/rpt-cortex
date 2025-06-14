@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -36,117 +35,55 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    
+    e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      console.log("Submitting waitlist form:", formData)
-      
-      // Process the form data through our edge function
+      console.log("Submitting waitlist form:", formData);
+
       const { data, error } = await supabase.functions.invoke('send-contact-email', {
-        body: formData
-      })
+        body: formData,
+      });
 
       if (error) {
-        console.error("Edge function error:", error)
-        throw error
+        // This handles network errors or function invocation errors
+        throw error;
       }
       
-      console.log("Waitlist submission processed:", data)
-      
-      // Create email content for Gmail with better formatting
-      const emailSubject = `New Risk Pro Technology Waitlist Submission - ${formData.name}`
-      const emailBody = `
-New Risk Pro Technology Waitlist Submission:
-
-Contact Information:
-Name: ${formData.name}
-Email: ${formData.email}
-LinkedIn: ${formData.linkedin || 'Not provided'}
-
-Current Risk Management Setup:
-Tool/System: ${formData.currentTool}
-
-Interest & Requirements:
-${formData.reason}
-
-Submission Details:
-Submitted at: ${new Date().toLocaleString()}
-Source: Risk Pro Technology Website
-Form Type: Waitlist Registration
-
----
-This is an automated submission from the Risk Pro Technology waitlist form.
-Please follow up with ${formData.name} at ${formData.email} regarding their interest in Risk Pro Technology.
-      `.trim()
-
-      // Open mailto link to send email
-      const mailtoLink = data?.mailtoLink || `mailto:604riskpro@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
-      
-      // Try to open the email client
-      if (typeof window !== 'undefined') {
-        window.open(mailtoLink, '_blank')
+      // The edge function itself might return an error in its response body
+      if (data.error) {
+        throw new Error(data.details || data.error);
       }
-      
-      toast.success("Thank you for joining our waitlist! An email has been prepared for you to send to our team.", {
+
+      console.log("Waitlist submission processed:", data);
+
+      toast.success(data.message || "Your submission has been received!", {
         duration: 5000,
-      })
-      
-      // Reset form
+      });
+
+      // Reset form on success
       setFormData({
         name: "",
         email: "",
         linkedin: "",
         currentTool: "",
         reason: ""
-      })
+      });
       
-      onClose()
-    } catch (error) {
-      console.error("Waitlist submission failed:", error)
-      
-      // Fallback: direct mailto with comprehensive details
-      const fallbackEmailBody = `
-New Risk Pro Technology Waitlist Submission:
-
-Contact Information:
-Name: ${formData.name}
-Email: ${formData.email}
-LinkedIn: ${formData.linkedin || 'Not provided'}
-
-Current Risk Management Setup:
-Tool/System: ${formData.currentTool}
-
-Interest & Requirements:
-${formData.reason}
-
-Submission Details:
-Submitted at: ${new Date().toLocaleString()}
-Source: Risk Pro Technology Website
-Form Type: Waitlist Registration
-
----
-This is a waitlist submission from the Risk Pro Technology website.
-Please follow up with ${formData.name} at ${formData.email} regarding their interest in Risk Pro Technology.
-      `.trim()
-
-      const fallbackMailtoLink = `mailto:604riskpro@gmail.com?subject=New Waitlist Submission - ${formData.name}&body=${encodeURIComponent(fallbackEmailBody)}`
-      
-      if (typeof window !== 'undefined') {
-        window.open(fallbackMailtoLink, '_blank')
-      }
-      
-      toast.warning("Please send the email that opened in your email client to complete your waitlist submission.", {
+      onClose();
+    } catch (error: any) {
+      console.error("Waitlist submission failed:", error);
+      toast.error(error.message || "Failed to submit form. Please try again.", {
         duration: 7000,
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleClose = () => {
     if (!isSubmitting) {
-      onClose()
+      onClose();
     }
   }
 
