@@ -40,6 +40,7 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
     setIsSubmitting(true)
     
     try {
+      // Process the form data through our edge function
       const { data, error } = await supabase.functions.invoke('send-contact-email', {
         body: formData
       })
@@ -48,8 +49,27 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
         throw error
       }
       
-      console.log("Email sent successfully:", data)
-      toast.success("Thank you for contacting us! We've received your information and will be in touch soon.", {
+      console.log("Form data processed:", data)
+      
+      // Create email content for Gmail
+      const emailSubject = `New Risk Pro Technology Contact Submission - ${formData.name}`
+      const emailBody = `
+New Risk Pro Technology Contact Submission:
+
+Name: ${formData.name}
+Email: ${formData.email}
+LinkedIn: ${formData.linkedin}
+Current Tool: ${formData.currentTool}
+Reason for Interest: ${formData.reason}
+
+Submitted at: ${new Date().toLocaleString()}
+      `
+
+      // Open mailto link to Gmail
+      const mailtoLink = `mailto:604riskpro@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
+      window.open(mailtoLink, '_blank')
+      
+      toast.success("Thank you for contacting us! An email has been prepared for you to send to our team.", {
         duration: 5000,
       })
       
@@ -64,9 +84,9 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
       
       onClose()
     } catch (error) {
-      console.error("Email sending failed:", error)
+      console.error("Form submission failed:", error)
       
-      // Fallback to mailto if Supabase function fails
+      // Fallback: direct mailto
       const emailBody = `
 New Risk Pro Technology Contact Submission:
 
@@ -77,12 +97,12 @@ Current Tool: ${formData.currentTool}
 Reason for Interest: ${formData.reason}
 
 Submitted at: ${new Date().toLocaleString()}
-      `;
+      `
 
-      const mailtoLink = `mailto:604riskpro@gmail.com?subject=New Contact Submission - ${formData.name}&body=${encodeURIComponent(emailBody)}`;
-      window.location.href = mailtoLink;
+      const mailtoLink = `mailto:604riskpro@gmail.com?subject=New Contact Submission - ${formData.name}&body=${encodeURIComponent(emailBody)}`
+      window.open(mailtoLink, '_blank')
       
-      toast.warning("Opening your email client to send the information. Please make sure to send the email to complete your submission.", {
+      toast.warning("Please send the email that opened in your email client to complete your submission.", {
         duration: 7000,
       })
     } finally {
@@ -180,7 +200,7 @@ Submitted at: ${new Date().toLocaleString()}
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             <Check className="mr-2 h-4 w-4" /> 
-            {isSubmitting ? "Sending..." : "Submit"}
+            {isSubmitting ? "Preparing Email..." : "Submit"}
           </Button>
         </form>
       </DialogContent>

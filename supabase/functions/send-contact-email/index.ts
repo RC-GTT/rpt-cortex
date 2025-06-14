@@ -1,8 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -27,27 +24,24 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, linkedin, currentTool, reason }: ContactRequest = await req.json();
 
-    // Send email to Risk Pro Technology
-    const emailResponse = await resend.emails.send({
-      from: "Contact Form <onboarding@resend.dev>", // You'll need to update this to your verified domain
-      to: ["604riskpro@gmail.com"],
-      subject: `New Contact Form Submission from ${name}`,
-      html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>LinkedIn:</strong> ${linkedin}</p>
-        <p><strong>Current Tool:</strong> ${currentTool}</p>
-        <p><strong>Reason for Interest:</strong></p>
-        <p>${reason}</p>
-        <hr>
-        <p><small>Submitted at: ${new Date().toLocaleString()}</small></p>
-      `,
-    });
+    // For now, we'll return the data and let the frontend handle the mailto fallback
+    // This ensures the form data is properly processed
+    const emailData = {
+      name,
+      email,
+      linkedin,
+      currentTool,
+      reason,
+      timestamp: new Date().toLocaleString()
+    };
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Contact form submission received:", emailData);
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: "Contact form data received",
+      data: emailData 
+    }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
