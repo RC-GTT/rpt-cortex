@@ -40,7 +40,7 @@ export const HeroSection = ({ showTitle }: HeroSectionProps) => {
         
         {/* Call to action last */}
         <Button size="lg" onClick={() => setIsModalOpen(true)} className="rounded-full px-8 py-6 text-base font-medium bg-primary hover:bg-primary/90 transition-all duration-300">
-          Contact Us
+          Join Waitlist
         </Button>
 
         <WaitlistModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
