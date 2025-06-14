@@ -40,36 +40,55 @@ export function WaitlistModal({ isOpen, onClose }: WaitlistModalProps) {
     setIsSubmitting(true)
     
     try {
+      console.log("Submitting waitlist form:", formData)
+      
       // Process the form data through our edge function
       const { data, error } = await supabase.functions.invoke('send-contact-email', {
         body: formData
       })
 
       if (error) {
+        console.error("Edge function error:", error)
         throw error
       }
       
-      console.log("Form data processed:", data)
+      console.log("Waitlist submission processed:", data)
       
-      // Create email content for Gmail
-      const emailSubject = `New Risk Pro Technology Contact Submission - ${formData.name}`
+      // Create email content for Gmail with better formatting
+      const emailSubject = `New Risk Pro Technology Waitlist Submission - ${formData.name}`
       const emailBody = `
-New Risk Pro Technology Contact Submission:
+New Risk Pro Technology Waitlist Submission:
 
+Contact Information:
 Name: ${formData.name}
 Email: ${formData.email}
-LinkedIn: ${formData.linkedin}
-Current Tool: ${formData.currentTool}
-Reason for Interest: ${formData.reason}
+LinkedIn: ${formData.linkedin || 'Not provided'}
 
+Current Risk Management Setup:
+Tool/System: ${formData.currentTool}
+
+Interest & Requirements:
+${formData.reason}
+
+Submission Details:
 Submitted at: ${new Date().toLocaleString()}
-      `
+Source: Risk Pro Technology Website
+Form Type: Waitlist Registration
 
-      // Open mailto link to Gmail
-      const mailtoLink = `mailto:604riskpro@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
-      window.open(mailtoLink, '_blank')
+---
+This is an automated submission from the Risk Pro Technology waitlist form.
+Please follow up with ${formData.name} at ${formData.email} regarding their interest in Risk Pro Technology.
+      `.trim()
+
+      // Open mailto link to send email
+      const mailtoLink = data?.mailtoLink || `mailto:604riskpro@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`
       
-      toast.success("Thank you for contacting us! An email has been prepared for you to send to our team.", {
+      // Try to open the email client
+      if (typeof window !== 'undefined') {
+        window.open(mailtoLink, '_blank')
+      }
+      
+      toast.success("Thank you for joining our waitlist! An email has been prepared for you to send to our team.", {
         duration: 5000,
       })
       
@@ -84,25 +103,40 @@ Submitted at: ${new Date().toLocaleString()}
       
       onClose()
     } catch (error) {
-      console.error("Form submission failed:", error)
+      console.error("Waitlist submission failed:", error)
       
-      // Fallback: direct mailto
-      const emailBody = `
-New Risk Pro Technology Contact Submission:
+      // Fallback: direct mailto with comprehensive details
+      const fallbackEmailBody = `
+New Risk Pro Technology Waitlist Submission:
 
+Contact Information:
 Name: ${formData.name}
 Email: ${formData.email}
-LinkedIn: ${formData.linkedin}
-Current Tool: ${formData.currentTool}
-Reason for Interest: ${formData.reason}
+LinkedIn: ${formData.linkedin || 'Not provided'}
 
+Current Risk Management Setup:
+Tool/System: ${formData.currentTool}
+
+Interest & Requirements:
+${formData.reason}
+
+Submission Details:
 Submitted at: ${new Date().toLocaleString()}
-      `
+Source: Risk Pro Technology Website
+Form Type: Waitlist Registration
 
-      const mailtoLink = `mailto:604riskpro@gmail.com?subject=New Contact Submission - ${formData.name}&body=${encodeURIComponent(emailBody)}`
-      window.open(mailtoLink, '_blank')
+---
+This is a waitlist submission from the Risk Pro Technology website.
+Please follow up with ${formData.name} at ${formData.email} regarding their interest in Risk Pro Technology.
+      `.trim()
+
+      const fallbackMailtoLink = `mailto:604riskpro@gmail.com?subject=New Waitlist Submission - ${formData.name}&body=${encodeURIComponent(fallbackEmailBody)}`
       
-      toast.warning("Please send the email that opened in your email client to complete your submission.", {
+      if (typeof window !== 'undefined') {
+        window.open(fallbackMailtoLink, '_blank')
+      }
+      
+      toast.warning("Please send the email that opened in your email client to complete your waitlist submission.", {
         duration: 7000,
       })
     } finally {
@@ -110,8 +144,14 @@ Submitted at: ${new Date().toLocaleString()}
     }
   }
 
+  const handleClose = () => {
+    if (!isSubmitting) {
+      onClose()
+    }
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Join Waitlist</DialogTitle>
@@ -121,7 +161,7 @@ Submitted at: ${new Date().toLocaleString()}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name">Name *</Label>
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -131,12 +171,13 @@ Submitted at: ${new Date().toLocaleString()}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 disabled={isSubmitting}
+                placeholder="Your full name"
               />
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email *</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -147,6 +188,7 @@ Submitted at: ${new Date().toLocaleString()}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
                 disabled={isSubmitting}
+                placeholder="your.email@company.com"
               />
             </div>
           </div>
@@ -161,14 +203,14 @@ Submitted at: ${new Date().toLocaleString()}
                 className="pl-10"
                 value={formData.linkedin}
                 onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                required
                 disabled={isSubmitting}
+                placeholder="https://linkedin.com/in/yourprofile"
               />
             </div>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="currentTool">Current Risk Management Tool</Label>
+            <Label htmlFor="currentTool">Current Risk Management Tool *</Label>
             <select
               id="currentTool"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
@@ -177,7 +219,7 @@ Submitted at: ${new Date().toLocaleString()}
               required
               disabled={isSubmitting}
             >
-              <option value="">Select a tool</option>
+              <option value="">Select your current tool</option>
               {TOOL_OPTIONS.map((tool) => (
                 <option key={tool} value={tool}>
                   {tool}
@@ -187,7 +229,7 @@ Submitted at: ${new Date().toLocaleString()}
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="reason">Why are you interested in Risk Pro Technology?</Label>
+            <Label htmlFor="reason">Why are you interested in Risk Pro Technology? *</Label>
             <textarea
               id="reason"
               className="flex min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
@@ -195,12 +237,13 @@ Submitted at: ${new Date().toLocaleString()}
               onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
               required
               disabled={isSubmitting}
+              placeholder="Tell us about your risk management challenges and how Risk Pro Technology could help..."
             />
           </div>
 
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             <Check className="mr-2 h-4 w-4" /> 
-            {isSubmitting ? "Preparing Email..." : "Submit"}
+            {isSubmitting ? "Processing..." : "Join Waitlist"}
           </Button>
         </form>
       </DialogContent>

@@ -24,23 +24,50 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, linkedin, currentTool, reason }: ContactRequest = await req.json();
 
-    // For now, we'll return the data and let the frontend handle the mailto fallback
-    // This ensures the form data is properly processed
-    const emailData = {
-      name,
-      email,
-      linkedin,
-      currentTool,
-      reason,
-      timestamp: new Date().toLocaleString()
-    };
+    console.log("Processing waitlist submission:", { name, email, currentTool });
 
-    console.log("Contact form submission received:", emailData);
+    // Create comprehensive email content for Gmail
+    const emailSubject = `New Risk Pro Technology Waitlist Submission - ${name}`;
+    const emailBody = `
+New Risk Pro Technology Waitlist Submission:
 
+Contact Information:
+Name: ${name}
+Email: ${email}
+LinkedIn: ${linkedin || 'Not provided'}
+
+Current Risk Management Setup:
+Tool/System: ${currentTool}
+
+Interest & Requirements:
+${reason}
+
+Submission Details:
+Submitted at: ${new Date().toLocaleString()}
+Source: Risk Pro Technology Website
+Form Type: Waitlist Registration
+
+---
+This is an automated submission from the Risk Pro Technology waitlist form.
+Please follow up with ${name} at ${email} regarding their interest in Risk Pro Technology.
+    `.trim();
+
+    // Generate the mailto link
+    const mailtoLink = `mailto:604riskpro@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+
+    // Return success response with the mailto link
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "Contact form data received",
-      data: emailData 
+      message: "Waitlist submission processed successfully",
+      mailtoLink: mailtoLink,
+      data: {
+        name,
+        email,
+        linkedin,
+        currentTool,
+        reason,
+        timestamp: new Date().toISOString()
+      }
     }), {
       status: 200,
       headers: {
@@ -49,9 +76,13 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
   } catch (error: any) {
-    console.error("Error in send-contact-email function:", error);
+    console.error("Error processing waitlist submission:", error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: "Failed to process waitlist submission",
+        details: error.message 
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
