@@ -1,25 +1,28 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+// A mock user type. For now, it's just an empty object.
+interface User {}
+
 interface AuthContextType {
-  isAuthenticated: boolean;
+  user: User | null;
   login: () => void;
-  logout: () => void;
+  signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
 
-  // This is a mock login function - will be replaced with actual auth later
+  // This is a mock login function
   const login = () => {
-    setIsAuthenticated(true);
+    setUser({}); // Set a mock user object
     localStorage.setItem('isAuthenticated', 'true');
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
+  const signOut = () => {
+    setUser(null);
     localStorage.removeItem('isAuthenticated');
   };
 
@@ -27,12 +30,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const authStatus = localStorage.getItem('isAuthenticated');
     if (authStatus === 'true') {
-      setIsAuthenticated(true);
+      setUser({});
     }
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, login, signOut }}>
       {children}
     </AuthContext.Provider>
   );

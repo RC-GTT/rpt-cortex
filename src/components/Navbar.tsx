@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, Settings, Search, Upload, Brain, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { AuthModal } from './AuthModal';
+import AuthModal from './AuthModal';
 import { WaitlistModal } from './waitlist/WaitlistModal';
 
 const Navbar = () => {
