@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { SearchIcon } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Chat, ChatMessage } from '@/types/chat';
 import { generateId, createNewChat as createNewChatUtil } from '@/utils/chatUtils';
@@ -206,10 +207,10 @@ export const Search: React.FC = () => {
             onClick={toggleSidebar}
             className="mr-2"
           >
-            <SearchIcon size={18} />
+            <MessageCircle size={18} />
           </Button>
           <h2 className="font-medium">
-            {activeChat?.title || 'Universal Search'}
+            {activeChat?.title || 'Universal Chat'}
           </h2>
         </div>
         

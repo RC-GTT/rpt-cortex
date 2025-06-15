@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Chat } from '@/types/chat';
-import { PlusCircle, Edit3, Trash2, SearchIcon } from 'lucide-react';
+import { PlusCircle, Edit3, Trash2, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { groupChatsByDate } from '@/utils/chatUtils';
 
@@ -67,28 +66,26 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
                       : "hover:bg-muted/50"
                   )}
                 >
-                  <SearchIcon size={16} className="flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    {isEditingTitle === chat.id ? (
-                      <form 
-                        onSubmit={(e) => {
-                          e.preventDefault();
-                          saveTitle(chat.id);
-                        }}
-                      >
-                        <Input
-                          value={editTitle}
-                          onChange={(e) => setEditTitle(e.target.value)}
-                          autoFocus
-                          onBlur={() => saveTitle(chat.id)}
-                          onClick={(e) => e.stopPropagation()}
-                          className="h-6 py-0 text-sm"
-                        />
-                      </form>
-                    ) : (
-                      <p className="text-sm truncate">{chat.title}</p>
-                    )}
-                  </div>
+                  <MessageCircle size={16} className="flex-shrink-0" />
+                  {isEditingTitle === chat.id ? (
+                    <form 
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        saveTitle(chat.id);
+                      }}
+                    >
+                      <Input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        autoFocus
+                        onBlur={() => saveTitle(chat.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-6 py-0 text-sm"
+                      />
+                    </form>
+                  ) : (
+                    <p className="text-sm truncate">{chat.title}</p>
+                  )}
                   <div className={cn(
                     "flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity",
                     activeChat?.id === chat.id ? "opacity-100" : ""

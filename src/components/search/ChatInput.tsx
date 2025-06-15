@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { SearchIcon, SendIcon } from 'lucide-react';
+import { MessageCircle, SendIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -29,7 +29,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           "w-full glass-panel flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300",
           isFocused ? "ring-2 ring-primary/30" : ""
         )}>
-          <SearchIcon 
+          <MessageCircle 
             size={20} 
             className={cn(
               "text-muted-foreground transition-all duration-300",
@@ -38,7 +38,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           />
           <input
             type="text"
-            placeholder="Ask your second brain anything..."
+            placeholder="Chat with your second brain..."
             className="w-full bg-transparent border-none outline-none focus:outline-none text-foreground"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

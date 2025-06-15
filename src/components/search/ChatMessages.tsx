@@ -19,9 +19,9 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ activeChat, isAssistantLoad
         className="h-full flex items-center justify-center"
       >
         <div className="text-center space-y-2 max-w-md">
-          <h3 className="text-xl font-medium">Search Your Second Brain</h3>
+          <h3 className="text-xl font-medium">Chat with Your Second Brain</h3>
           <p className="text-muted-foreground">
-            Ask questions to search across your notes, documents, and knowledge base.
+            Ask questions and chat with your notes, documents, and knowledge base.
           </p>
         </div>
       </AnimatedTransition>
