@@ -118,7 +118,7 @@ export const Search: React.FC = () => {
         });
 
         if (error) {
-          throw new Error(error.message);
+          throw error; // Throw the original error to be caught below
         }
 
         const aiMessage: ChatMessage = {
@@ -147,9 +147,10 @@ export const Search: React.FC = () => {
 
       } catch (err: any) {
         console.error("Error invoking gemini-search:", err);
+        const description = err.context?.message || err.message || "An unknown error occurred.";
         toast({
           title: "Error",
-          description: `Failed to get AI response: ${err.message}`,
+          description: `Failed to get AI response: ${description}`,
           variant: "destructive",
         });
         const errorMessage: ChatMessage = {
