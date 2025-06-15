@@ -12,10 +12,21 @@ const corsHeaders = {
 serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    if (!GEMINI_API_KEY) {
+      console.error("GEMINI_API_KEY is not set.");
+      return new Response(
+        JSON.stringify({ error: "Missing GEMINI_API_KEY. Please set it in Supabase secrets." }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const { prompt } = await req.json();
 
     if (!prompt) {
@@ -30,7 +41,6 @@ serve(async (req: Request) => {
       {
         method: "POST",
         headers: {
-          ...corsHeaders,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
