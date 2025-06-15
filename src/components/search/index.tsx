@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { SearchIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,8 @@ import ChatSidebar from './ChatSidebar';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 export const Search: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,7 +18,8 @@ export const Search: React.FC = () => {
   const [isEditingTitle, setIsEditingTitle] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
-  
+  const [isAssistantLoading, setIsAssistantLoading] = useState(false);
+
   // Initialize with a sample chat on first render
   useEffect(() => {
     if (chats.length === 0) {
@@ -73,10 +75,9 @@ export const Search: React.FC = () => {
   };
 
   // Handle message submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim() && activeChat) {
-      // Create user message
       const userMessage: ChatMessage = {
         id: generateId(),
         type: 'user',
@@ -84,10 +85,10 @@ export const Search: React.FC = () => {
         timestamp: new Date()
       };
       
-      // Update chat with new message
+      let chatWithUserMessage = activeChat;
+
       const updatedChats = chats.map(chat => {
         if (chat.id === activeChat.id) {
-          // If this is the first message, update the chat title
           let updatedTitle = chat.title;
           if (chat.messages.length === 0) {
             updatedTitle = searchQuery.length > 25 
@@ -95,50 +96,79 @@ export const Search: React.FC = () => {
               : searchQuery;
           }
           
-          return {
+          chatWithUserMessage = {
             ...chat,
             title: updatedTitle,
             messages: [...chat.messages, userMessage],
             updatedAt: new Date()
           };
+          return chatWithUserMessage;
         }
         return chat;
       });
       
       setChats(updatedChats);
+      setActiveChat(chatWithUserMessage);
       setSearchQuery('');
-      
-      // Find the updated active chat
-      const updatedActiveChat = updatedChats.find(chat => chat.id === activeChat.id);
-      if (updatedActiveChat) {
-        setActiveChat(updatedActiveChat);
-        
-        // Add AI response after a short delay
-        setTimeout(() => {
-          const aiMessage: ChatMessage = {
-            id: generateId(),
-            type: 'assistant',
-            content: `Based on your search for "${userMessage.content}", I found several relevant notes in your second brain. Would you like me to summarize the key insights?`,
-            timestamp: new Date()
-          };
-          
-          const updatedChatsWithAi = updatedChats.map(chat => {
+      setIsAssistantLoading(true);
+
+      try {
+        const { data, error } = await supabase.functions.invoke('gemini-search', {
+          body: { prompt: userMessage.content },
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        const aiMessage: ChatMessage = {
+          id: generateId(),
+          type: 'assistant',
+          content: data.response || "Sorry, I couldn't get a response. Please try again.",
+          timestamp: new Date()
+        };
+
+        const finalChats = updatedChats.map(chat => {
+          if (chat.id === activeChat.id) {
+            return {
+              ...chat,
+              messages: [...chat.messages, aiMessage],
+              updatedAt: new Date()
+            };
+          }
+          return chat;
+        });
+
+        setChats(finalChats);
+        const finalActiveChat = finalChats.find(chat => chat.id === activeChat.id);
+        if (finalActiveChat) {
+          setActiveChat(finalActiveChat);
+        }
+
+      } catch (err: any) {
+        console.error("Error invoking gemini-search:", err);
+        toast({
+          title: "Error",
+          description: `Failed to get AI response: ${err.message}`,
+          variant: "destructive",
+        });
+        const errorMessage: ChatMessage = {
+          id: generateId(),
+          type: 'assistant',
+          content: "Sorry, I encountered an error. Please check the function logs and your API key.",
+          timestamp: new Date()
+        };
+        const chatsWithEror = updatedChats.map(chat => {
             if (chat.id === activeChat.id) {
-              return {
-                ...chat,
-                messages: [...chat.messages, aiMessage],
-                updatedAt: new Date()
-              };
+                return { ...chat, messages: [...chat.messages, errorMessage] };
             }
             return chat;
-          });
-          
-          setChats(updatedChatsWithAi);
-          const updatedActiveChatWithAi = updatedChatsWithAi.find(chat => chat.id === activeChat.id);
-          if (updatedActiveChatWithAi) {
-            setActiveChat(updatedActiveChatWithAi);
-          }
-        }, 800);
+        });
+        setChats(chatsWithEror);
+        setActiveChat(chatsWithEror.find(c => c.id === activeChat.id) || null);
+
+      } finally {
+        setIsAssistantLoading(false);
       }
     }
   };
@@ -183,7 +213,7 @@ export const Search: React.FC = () => {
         </div>
         
         {/* Chat messages area */}
-        <ChatMessages activeChat={activeChat} />
+        <ChatMessages activeChat={activeChat} isAssistantLoading={isAssistantLoading} />
         
         {/* Input area */}
         <ChatInput 
