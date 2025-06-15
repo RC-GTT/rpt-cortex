@@ -7,6 +7,7 @@ const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
@@ -14,9 +15,10 @@ const corsHeaders = {
 serve(async (req: Request) => {
   console.log(`[gemini-search] Received request: ${req.method}`);
   
+  // Explicitly handle CORS preflight requests
   if (req.method === "OPTIONS") {
     console.log("[gemini-search] Handling OPTIONS preflight request.");
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { status: 204, headers: corsHeaders });
   }
 
   try {
