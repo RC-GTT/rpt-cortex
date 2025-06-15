@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, Settings, Search, Upload, Brain, Home, MessageCircle } from 'lucide-react';
@@ -10,7 +11,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isWaitlistModalOpen, setIsWaitlistModalOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
@@ -29,6 +30,10 @@ const Navbar = () => {
     { name: 'Profile', href: '/profile', icon: User },
     { name: 'Settings', href: '/settings', icon: Settings },
   ] : [];
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <>
@@ -82,10 +87,19 @@ const Navbar = () => {
                 Join Waitlist
               </Button>
               
-              {user ? (
-                <Button variant="outline" size="sm" onClick={signOut}>
-                  Sign Out
+              {loading ? (
+                <Button variant="outline" size="sm" disabled>
+                  Loading...
                 </Button>
+              ) : user ? (
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-muted-foreground">
+                    {user.email}
+                  </span>
+                  <Button variant="outline" size="sm" onClick={handleSignOut}>
+                    Sign Out
+                  </Button>
+                </div>
               ) : (
                 <Button size="sm" onClick={() => setIsAuthModalOpen(true)}>
                   Sign In
@@ -154,10 +168,19 @@ const Navbar = () => {
                     Join Waitlist
                   </Button>
                   
-                  {user ? (
-                    <Button variant="outline" size="sm" className="w-full" onClick={signOut}>
-                      Sign Out
+                  {loading ? (
+                    <Button variant="outline" size="sm" className="w-full" disabled>
+                      Loading...
                     </Button>
+                  ) : user ? (
+                    <div className="space-y-2">
+                      <div className="text-sm text-muted-foreground text-center">
+                        {user.email}
+                      </div>
+                      <Button variant="outline" size="sm" className="w-full" onClick={handleSignOut}>
+                        Sign Out
+                      </Button>
+                    </div>
                   ) : (
                     <Button size="sm" className="w-full" onClick={() => setIsAuthModalOpen(true)}>
                       Sign In
