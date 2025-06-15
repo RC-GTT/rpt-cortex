@@ -58,7 +58,9 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
       } else {
         toast({
           title: "Success",
-          description: isSignUp ? "Account created successfully!" : "Logged in successfully!",
+          description: isSignUp 
+            ? "Account created! Welcome to the demo!" 
+            : "Welcome back! Enjoy the chat demo!",
         });
         onClose();
         setEmail('');
@@ -82,17 +84,23 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     setPassword('');
   };
 
+  const handleQuickDemo = () => {
+    setEmail('demo@example.com');
+    setPassword('demo123');
+    setIsSignUp(true);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
-            {isSignUp ? 'Create your account' : 'Login to your account'}
+            {isSignUp ? 'Create Demo Account' : 'Sign In to Demo'}
           </DialogTitle>
           <DialogDescription>
             {isSignUp 
-              ? 'Sign up to access all features and start building your second brain.'
-              : 'Welcome back! Please login to access your account.'
+              ? 'Create a free account to try our AI chat demo. No credit card required!'
+              : 'Sign in to access the AI chat demo and experience the future of conversation.'
             }
           </DialogDescription>
         </DialogHeader>
@@ -122,17 +130,37 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             />
           </div>
           
+          {isSignUp && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                💡 Quick start: Use any email and password to create your demo account instantly!
+              </p>
+            </div>
+          )}
+          
           <DialogFooter className="flex-col space-y-2">
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Login')}
+              {loading ? 'Processing...' : (isSignUp ? 'Create Demo Account' : 'Sign In to Demo')}
             </Button>
+            
+            {isSignUp && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleQuickDemo}
+                className="w-full"
+              >
+                Quick Demo Setup
+              </Button>
+            )}
+            
             <Button 
               type="button" 
               variant="ghost" 
               onClick={toggleMode}
               className="w-full"
             >
-              {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign up"}
+              {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Create demo account"}
             </Button>
             <Button type="button" variant="outline" onClick={onClose} className="w-full">
               Cancel
